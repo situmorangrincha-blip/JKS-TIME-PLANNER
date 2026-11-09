@@ -92,11 +92,20 @@ details.card[open] summary{margin-bottom:8px}
 .tl .o{background:var(--blue)} .tl .t{background:var(--org)} .tl .b{background:#B7C3CD}
 tr.brk td{background:var(--line2);color:var(--mut);font-weight:600;text-align:center;padding:4px 8px}
 td.hk{color:var(--mut);font-size:11.5px;white-space:nowrap}
+.rgh{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 4px}
+.rg{display:flex;gap:6px;align-items:center}
+.rg input{flex:1;min-width:0;border:1px solid var(--line);border-radius:7px;padding:5px 6px;background:#fff}
+.rg span{color:var(--mut);font-size:12px}
+.rg .x{border:0;background:none;color:var(--bad);font-size:20px;cursor:pointer;line-height:1;padding:0 4px}
+.rgi{font-size:11.5px;color:var(--mut);margin:2px 0 6px}
+.warnline{font-size:12px;color:var(--warn);margin-top:4px}
+.row2{display:flex;gap:14px;flex-wrap:wrap}
+.row2 label{display:flex;gap:6px;align-items:center;font-size:12.5px}
 .tl .ax{display:flex;justify-content:space-between;color:var(--mut);font-size:11.5px;margin-top:3px}
 .lg{display:flex;gap:12px;font-size:11.5px;color:var(--mut);margin-bottom:8px}
 .lg s{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;text-decoration:none}
 .tbw{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:auto}
-table{border-collapse:collapse;width:100%;min-width:900px}
+table{border-collapse:collapse;width:100%;min-width:980px}
 th{font:600 12px var(--body);color:var(--mut);text-align:left;padding:7px 8px;background:#F6F8FA;border-bottom:1px solid var(--line);position:sticky;top:0;white-space:nowrap}
 td{padding:5px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
 tr:last-child td{border-bottom:0}
@@ -136,37 +145,49 @@ td.ad{max-width:240px;color:var(--mut);white-space:nowrap;overflow:hidden;text-o
 <aside class="rail">
   <section class="card">
     <h2>Data</h2>
-    <label class="drop" id="dJks"><input type="file" accept=".xlsx,.xls" hidden><span class="ic">J</span><span><b>JKS (genap atau ganjil)</b><small id="tJks">Pilih file JKS SP Kebayoran (.xlsx)</small></span></label>
-    <label class="drop" id="dRfb"><input type="file" accept=".xlsx,.xls" hidden><span class="ic">R</span><span><b>Route Feedback</b><small id="tRfb">Pilih file Route Feedback (.xlsx)</small></span></label>
+    <label class="drop" id="dJks"><input type="file" accept=".xlsx,.xls" multiple hidden><span class="ic">J</span><span><b>JKS (genap, ganjil, atau dua-duanya)</b><small id="tJks">Pilih satu atau dua file JKS SP Kebayoran (.xlsx)</small></span></label>
+    <label class="drop" id="dRfb"><input type="file" accept=".xlsx,.xls" hidden><span class="ic">R</span><span><b>Route Feedback</b><small id="tRfb">Boleh berisi beberapa minggu sampai dua bulan (.xlsx)</small></span></label>
+  </section>
+
+  <section class="card" id="cRange">
+    <h2>Periode acuan Route Feedback</h2>
+    <p class="note" style="margin:0 0 6px">Tentukan tanggal mana saja yang jadi acuan untuk minggu genap dan ganjil. Web mencari toko pertama dan urutan yang paling sering dijalani salesman di tanggal-tanggal itu.</p>
+    <div id="rgGenap"></div>
+    <div id="rgGanjil"></div>
+    <div class="warnline" id="rgWarn"></div>
+    <div class="grid2" style="margin-top:8px;align-items:end">
+      <div class="fld"><label for="sFirstWk">Saran otomatis: minggu pertama</label><select id="sFirstWk"><option value="genap">Genap</option><option value="ganjil">Ganjil</option></select></div>
+      <button class="btn sec sm2" id="autoRg" type="button">Isi saran per minggu</button>
+    </div>
   </section>
 
   <section class="card">
     <h2>Aturan</h2>
     <div class="grid2">
-      <div class="fld full"><label for="sWeek">Baris JKS yang dipakai</label>
-        <select id="sWeek">
-          <option value="auto">Otomatis dari file (genap atau ganjil)</option>
-          <option value="genap">Minggu genap (mingguan + Minggu 2&amp;4)</option>
-          <option value="ganjil">Minggu ganjil (mingguan + Minggu 1&amp;3)</option>
-          <option value="wk">Mingguan saja ([n]HARI)</option>
-          <option value="g24">Minggu 2&amp;4 saja</option>
-          <option value="g13">Minggu 1&amp;3 saja</option>
-          <option value="all">Semua baris</option>
-        </select></div>
+      <div class="fld full"><label>Buat jadwal untuk</label><div class="row2"><label><input id="sWkG" type="checkbox" checked>Minggu genap</label><label><input id="sWkN" type="checkbox" checked>Minggu ganjil</label></div></div>
       <div class="fld"><label for="sStatus">Status toko</label>
         <select id="sStatus"><option value="all">Semua</option><option value="ACT">ACT saja</option></select></div>
       <div class="fld"><label for="sOut">Buang durasi di atas (menit)</label><input id="sOut" type="number" min="10" value="90"></div>
+      <div class="fld full"><label for="sDurSrc">Durasi di toko dihitung dari</label>
+        <select id="sDurSrc"><option value="all">Seluruh data Route Feedback</option><option value="ref">Hanya tanggal acuan</option></select></div>
+      <div class="fld full"><label for="sExtra">Toko di luar JKS ikut jadwal bila muncul di minimal (% minggu acuan)</label><input id="sExtra" type="number" min="0" max="100" value="50"></div>
+      <p class="note" style="grid-column:1/-1;margin:-4px 0 0">Isi 0 untuk mematikan. Agenda lainnya tidak pernah ikut urutan.</p>
       <label class="chk"><input id="sSkip" type="checkbox" checked><span>Durasi rata-rata tidak menghitung kunjungan toko tutup dan agenda lainnya</span></label>
-      <label class="chk"><input id="sAnch" type="checkbox"><span>Toko pertama tidak boleh kunjungan toko tutup atau agenda lainnya</span></label>
+      <label class="chk"><input id="sAnch" type="checkbox"><span>Toko pertama tidak boleh kunjungan toko tutup</span></label>
     </div>
   </section>
 
   <section class="card">
-    <h2>Jam dan penyesuaian</h2>
+    <h2>Urutan, jam, dan penyesuaian</h2>
     <div class="grid2">
+      <div class="fld full"><label for="sOrder">Urutan toko</label>
+        <select id="sOrder">
+          <option value="near">Terdekat dulu (berdasar waktu tempuh)</option>
+          <option value="rfb">Urutan paling sering di Route Feedback</option>
+        </select></div>
       <div class="fld full"><label for="sStartMode">Jam mulai hari</label>
         <select id="sStartMode">
-          <option value="rfb">Ikuti Route Feedback, kalau tidak ada pakai jam di bawah</option>
+          <option value="rfb">Median jam Route Feedback, kalau tidak ada pakai jam di bawah</option>
           <option value="fixed">Selalu pakai jam di bawah (abaikan Route Feedback)</option>
         </select></div>
       <div class="fld"><label for="sStart">Jam mulai</label><input id="sStart" type="time" value="08:00"></div>
@@ -178,7 +199,7 @@ td.ad{max-width:240px;color:var(--mut);white-space:nowrap;overflow:hidden;text-o
       <div class="fld"><label for="sAddTrv">Tambah menit perjalanan</label><input id="sAddTrv" type="number" step="1" value="0"></div>
       <div class="fld"><label for="sFactor">Faktor koreksi waktu</label><input id="sFactor" type="number" step="0.05" min="0.5" value="1.3"></div>
       <div class="fld"><label for="sBase">Server OSRM</label><input id="sBase" type="text" value="https://router.project-osrm.org"></div>
-      <p class="note full" style="grid-column:1/-1;margin:0">Bagian ini langsung berlaku tanpa hitung ulang. Penambahan menit berlaku per toko dan per ruas perjalanan.</p>
+      <p class="note" style="grid-column:1/-1;margin:0">Urutan, jam, istirahat, tambahan menit, dan faktor langsung berlaku tanpa hitung ulang.</p>
     </div>
   </section>
 
@@ -311,47 +332,94 @@ function buildDurModel(rfb,o){
     }};
 }
 
-function planDays(jks,rfb,selIds,o){
-  const rows=jks.filter(r=>weekOk(r.tipe,o.week)&&(o.status==='all'||r.status==='ACT'));
-  const anyGeo=new Map(),meta=new Map();
-  for(const r of jks){ if(validGeo(r)&&!anyGeo.has(r.idP))anyGeo.set(r.idP,r); if(!meta.has(r.idS))meta.set(r.idS,{idS:r.idS,nama:r.nama,tipeSales:r.tipeSales,depo:r.depo}); }
-  const vis=new Map(),dates=new Map(),rfbNama=new Map();
+const isAgenda=a=>String(a||'').toLowerCase().includes('agenda lain');
+const isTutup=a=>String(a||'').toLowerCase().includes('toko tutup');
+const addDays=(ds,n)=>{const d=new Date(ds+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);};
+const mondayOf=ds=>addDays(ds,-wdOf(ds));
+const inRanges=(ds,rs)=>(rs||[]).some(r=>r.from&&r.to&&ds>=r.from&&ds<=r.to);
+const WK_LABEL={genap:'Minggu Genap',ganjil:'Minggu Ganjil'};
+
+/* Urutan kunjungan nyata dari Route Feedback, per salesman + jenis minggu + hari, dari banyak minggu acuan */
+function buildRef(rfb,o){
+  const byDay=new Map();
   for(const v of rfb){
-    const k=v.idS+'|'+v.dateStr; (vis.get(k)||vis.set(k,[]).get(k)).push(v);
-    (dates.get(v.idS)||dates.set(v.idS,new Set()).get(v.idS)).add(v.dateStr); rfbNama.set(v.idS,v.nama);
+    if(!(v.start>0)||isAgenda(v.alasan)) continue;
+    const k=v.idS+'|'+v.dateStr;(byDay.get(k)||byDay.set(k,[]).get(k)).push(v);
   }
-  const mkStop=r=>({jks:r.hari,idP:r.idP,namaP:r.namaP,alamat:r.alamat,lat:r.lat,lon:r.lon,urut:r.urut,outsidePlan:false});
+  const groups=new Map();
+  for(const [k,list] of byDay){
+    const p=k.split('|'),idS=p[0],ds=p[1];
+    const wk=['genap','ganjil'].find(w=>inRanges(ds,o.ranges[w]));
+    if(!wk) continue;
+    list.sort((a,b)=>a.start-b.start||a.end-b.end);
+    const seen=new Set(),seq=[];
+    for(const v of list){if(!seen.has(v.idC)){seen.add(v.idC);seq.push(v);}}
+    let fi=0;if(o.anchorSkip){fi=seq.findIndex(v=>!isTutup(v.alasan));if(fi<0)continue;}
+    const key=idS+'|'+wk+'|'+wdOf(ds);
+    (groups.get(key)||groups.set(key,[]).get(key)).push({ds,seq,first:seq[fi]});
+  }
+  const out=new Map();
+  for(const [key,arr] of groups){
+    arr.sort((a,b)=>a.ds<b.ds?-1:1);
+    const N=arr.length,fc=new Map(),rk=new Map(),names=new Map();
+    for(const a of arr){
+      const f=a.first,e=fc.get(f.idC)||fc.set(f.idC,{n:0,st:[]}).get(f.idC);e.n++;e.st.push(f.start);
+      const L=Math.max(a.seq.length-1,1);
+      a.seq.forEach((v,i)=>{names.set(v.idC,v.namaC);const r=rk.get(v.idC)||rk.set(v.idC,{n:0,r:[]}).get(v.idC);r.n++;r.r.push(i/L);});
+    }
+    let aid=null,best=null;
+    for(const [id,e] of fc){const ms=median(e.st);if(!best||e.n>best.n||(e.n===best.n&&ms<best.ms)){best={n:e.n,ms};aid=id;}}
+    const ranked=[...rk.entries()].filter(([id])=>id!==aid).map(([id,e])=>({id,n:e.n,mr:median(e.r)})).sort((a,b)=>a.mr-b.mr||b.n-a.n);
+    const cnt=new Map();for(const [id,e] of rk)cnt.set(id,e.n);
+    out.set(key,{N,dates:arr.map(a=>a.ds),anchorId:aid,anchorName:names.get(aid),anchorN:best.n,
+      anchorStart:Math.round(median(arr.map(a=>a.first.start))),seqIds:[aid,...ranked.map(x=>x.id)],cnt,names});
+  }
+  return out;
+}
+
+function planDays(jks,rfb,selIds,o){
+  const ref=buildRef(rfb,o);
+  const anyGeo=new Map(),meta=new Map(),rfbNama=new Map();
+  for(const r of jks){ if(validGeo(r)&&!anyGeo.has(r.idP))anyGeo.set(r.idP,r); if(!meta.has(r.idS))meta.set(r.idS,{idS:r.idS,nama:r.nama,tipeSales:r.tipeSales,depo:r.depo}); }
+  for(const v of rfb) rfbNama.set(v.idS,v.nama);
+  const mkStop=r=>({jks:r.hari,idP:r.idP,namaP:r.namaP,alamat:r.alamat,lat:r.lat,lon:r.lon,urut:r.urut,outsidePlan:false,freq:null});
   const out=[];
   for(const idS of selIds){
     const m=meta.get(idS); if(!m) continue;
-    const mine=rows.filter(r=>r.idS===idS), days=[];
-    for(let wd=0;wd<7;wd++){
-      const dr=mine.filter(r=>r.wd===wd).sort((a,b)=>a.urut-b.urut); if(!dr.length) continue;
-      const seen=new Set(),stops=[],bad=[],warn=[];
-      for(const r of dr){ if(seen.has(r.idP))continue; seen.add(r.idP); if(validGeo(r))stops.push(mkStop(r)); else bad.push(r.namaP||r.idP); }
-      let anchor=null,dateStr=null;
-      for(const d of [...(dates.get(idS)||[])].filter(d=>wdOf(d)===wd).sort()){
-        let list=(vis.get(idS+'|'+d)||[]).filter(v=>v.start>0);
-        if(o.anchorSkip) list=list.filter(v=>!isNonVisit(v.alasan));
-        list.sort((a,b)=>a.start-b.start||a.end-b.end);
-        if(list.length){anchor=list[0];dateStr=d;break;}
-      }
-      let anchorInfo={src:'fallback'};
-      if(anchor){
-        const i=stops.findIndex(s=>s.idP===anchor.idC);
-        if(i>=0){const [s]=stops.splice(i,1);stops.unshift(s);anchorInfo={src:'rfb',start:anchor.start,date:dateStr,namaC:anchor.namaC,outsidePlan:false};}
-        else{
-          const gr=anyGeo.get(anchor.idC);
-          if(gr){const s=mkStop(gr);s.outsidePlan=true;stops.unshift(s);anchorInfo={src:'rfb',start:anchor.start,date:dateStr,namaC:anchor.namaC||gr.namaP,outsidePlan:true};}
-          else warn.push('Toko pertama dari Route Feedback ('+(anchor.namaC||anchor.idC)+') tidak punya geotag di JKS. Dipakai toko No Urut terkecil sebagai titik awal.');
+    for(const wk of o.wkTypes){
+      const mine=jks.filter(r=>r.idS===idS&&weekOk(r.tipe,wk)&&(o.status==='all'||r.status==='ACT'));
+      const days=[];
+      for(let wd=0;wd<7;wd++){
+        const dr=mine.filter(r=>r.wd===wd).sort((a,b)=>a.urut-b.urut); if(!dr.length) continue;
+        const seen=new Set(),stops=[],bad=[],warn=[];
+        for(const r of dr){ if(seen.has(r.idP))continue; seen.add(r.idP); if(validGeo(r))stops.push(mkStop(r)); else bad.push(r.namaP||r.idP); }
+        const st=ref.get(idS+'|'+wk+'|'+wd)||null;
+        let anchorInfo={src:'fallback'};
+        if(st){
+          const i=stops.findIndex(s=>s.idP===st.anchorId);
+          if(i>=0){const [s]=stops.splice(i,1);stops.unshift(s);anchorInfo={src:'rfb',namaC:st.anchorName,n:st.anchorN,N:st.N,outsidePlan:false};}
+          else{
+            const gr=anyGeo.get(st.anchorId);
+            if(gr){const s=mkStop(gr);s.outsidePlan=true;stops.unshift(s);anchorInfo={src:'rfb',namaC:st.anchorName||gr.namaP,n:st.anchorN,N:st.N,outsidePlan:true};}
+            else warn.push('Toko pertama dari Route Feedback ('+(st.anchorName||st.anchorId)+') tidak punya geotag di JKS. Dipakai toko No Urut terkecil sebagai titik awal.');
+          }
+          if(o.extraPct>0&&st.N>=2){
+            const have=new Set(stops.map(s=>s.idP));
+            for(const [id,n] of st.cnt){
+              if(have.has(id)||n/st.N<o.extraPct/100) continue;
+              const gr=anyGeo.get(id); if(!gr) continue;
+              const s=mkStop(gr);s.outsidePlan=true;stops.push(s);have.add(id);
+            }
+          }
+          stops.forEach(s=>{s.freq={n:st.cnt.get(s.idP)||0,N:st.N};});
         }
+        if(!stops.length) continue;
+        if(bad.length) warn.push(bad.length+' toko dibuang karena geotag tidak valid: '+bad.slice(0,4).join(', ')+(bad.length>4?' dan lainnya':''));
+        const cnt=new Map();for(const s2 of stops){if(!s2.outsidePlan)cnt.set(s2.jks,(cnt.get(s2.jks)||0)+1);}
+        days.push({wd,hari:HARI[wd],refN:st?st.N:0,refDates:st?st.dates:[],anchor:anchorInfo,anchorStart:st?st.anchorStart:null,rfbSeq:st?st.seqIds:null,jadwal:[...cnt.entries()],stops,warn,status:'pending'});
       }
-      if(!stops.length) continue;
-      if(bad.length) warn.push(bad.length+' toko dibuang karena geotag tidak valid: '+bad.slice(0,4).join(', ')+(bad.length>4?' dan lainnya':''));
-      const cnt=new Map();for(const s2 of stops){if(!s2.outsidePlan)cnt.set(s2.jks,(cnt.get(s2.jks)||0)+1);}
-      days.push({wd,hari:HARI[wd],dateStr,anchor:anchorInfo,anchorStart:anchorInfo.src==='rfb'?anchorInfo.start:null,jadwal:[...cnt.entries()],stops,warn,status:'pending'});
+      if(days.length) out.push({key:idS+'|'+wk,idS,wk,wkLabel:WK_LABEL[wk],...m,rfbNama:rfbNama.get(idS)||null,days});
     }
-    if(days.length) out.push({...m,rfbNama:rfbNama.get(idS)||null,days});
   }
   return out;
 }
@@ -382,14 +450,34 @@ function nnOrder(M){
   }
   return ord;
 }
+/* urutan toko: terdekat dulu, atau mengikuti urutan Route Feedback (toko yang tidak ada di acuan disisipkan di posisi terdekat) */
+function orderFor(day,o){
+  const n=day.stops.length,M=day.M;
+  if(o.orderMode==='rfb'&&day.rfbSeq){
+    const idx=new Map();day.stops.forEach((s,i)=>idx.set(s.idP,i));
+    const ord=[0],used=new Set([0]),ins=new Set();
+    for(const id of day.rfbSeq){const i=idx.get(id);if(i!==undefined&&!used.has(i)){ord.push(i);used.add(i);}}
+    const d=(a,b)=>{const v=M[a][b];return v==null?10800:v;};
+    for(let s=0;s<n;s++){
+      if(used.has(s))continue;
+      let bp=ord.length,bc=Infinity;
+      for(let p=1;p<=ord.length;p++){const a=ord[p-1],b=p<ord.length?ord[p]:null;const c=d(a,s)+(b==null?0:d(s,b)-d(a,b));if(c<bc){bc=c;bp=p;}}
+      ord.splice(bp,0,s);used.add(s);ins.add(s);
+    }
+    return {ord,ins};
+  }
+  return {ord:nnOrder(M),ins:new Set()};
+}
 function scheduleDay(day,idS,ctx){
-  const o=ctx.o,stops=day.stops,n=stops.length,M=day.M,ord=day.ord;
+  const o=ctx.o,stops=day.stops,n=stops.length,M=day.M;
+  const {ord,ins}=orderFor(day,o);
+  day.ord=ord;
   const useRfb=o.startMode==='rfb'&&day.anchorStart!=null;
   day.startMin=useRfb?day.anchorStart:o.startFallback;day.startSrc=useRfb?'rfb':'manual';
   const bs=o.breakOn?o.breakStart:0,be=o.breakOn?o.breakEnd:0,rows=[];
   let breakDone=!(o.breakOn&&be>bs),t=day.startMin,totOut=0,totTrv=0,breakMin=0;
   for(let k=0;k<n;k++){
-    const s=stops[ord[k]],d=ctx.durModel.durFor(s.idP,idS);
+    const si=ord[k],s=stops[si],d=ctx.durModel.durFor(s.idP,idS);
     const outKey=clamp(d.key+o.addOut,1,MAXMIN);
     let jam=t,brk=null;
     if(k>0&&!breakDone){
@@ -397,9 +485,9 @@ function scheduleDay(day,idS,ctx){
       else if(jam>=be)breakDone=true;
     }
     let leg=null,key=null;
-    if(k<n-1){const sec=M[ord[k]][ord[k+1]];leg=(sec==null?3600:sec)*ctx.factor/60;key=clamp(Math.round(leg)+o.addTrv,1,MAXMIN);}
+    if(k<n-1){const sec=M[si][ord[k+1]];leg=(sec==null?3600:sec)*ctx.factor/60;key=clamp(Math.round(leg)+o.addTrv,1,MAXMIN);}
     const selesai=jam+outKey;
-    rows.push({seq:k,...s,isAnchor:k===0&&day.anchor.src==='rfb',dur:d,outKey,addOut:o.addOut,addTrv:o.addTrv,jam,selesai,leg,key,brk});
+    rows.push({seq:k,...s,isAnchor:k===0&&day.anchor.src==='rfb',inserted:ins.has(si),dur:d,outKey,addOut:o.addOut,addTrv:o.addTrv,jam,selesai,leg,key,brk});
     totOut+=outKey;if(key!=null)totTrv+=key;
     t=selesai+(key||0);
   }
@@ -408,22 +496,33 @@ function scheduleDay(day,idS,ctx){
 async function solveDay(day,idS,ctx){
   const stops=day.stops,n=stops.length;
   if(n>100) throw new Error('Satu hari berisi '+n+' toko, melebihi batas 100 titik OSRM.');
-  const M=day.useEst?estMatrix(stops):(n>1?await osrmMatrix(stops,ctx.base,ctx.fetcher):[[0]]);
-  day.M=M;day.ord=nnOrder(M);
-  scheduleDay(day,idS,ctx);
+  let M;day.fetched=false;
+  if(day.useEst) M=estMatrix(stops);
+  else if(n<=1) M=[[0]];
+  else{
+    const c=ctx.cache||(ctx.cache=new Map());let ok=true;
+    M=stops.map(a=>stops.map(b=>{if(a.idP===b.idP)return 0;const v=c.get(a.idP+'>'+b.idP);if(v===undefined)ok=false;return v===undefined?0:v;}));
+    if(!ok){
+      M=await osrmMatrix(stops,ctx.base,ctx.fetcher);day.fetched=true;
+      stops.forEach((a,i)=>stops.forEach((b,j)=>c.set(a.idP+'>'+b.idP,M[i][j])));
+    }
+  }
+  day.M=M;scheduleDay(day,idS,ctx);
   day.status=day.useEst?'est':'ok';day.err=null;
 }
 
 function descRow(r){
   const p=[],sg=n=>(n>0?'+':'')+n;
-  if(r.isAnchor)p.push('Toko pertama (RFB)'); else if(r.seq===0)p.push('Titik awal');
+  if(r.isAnchor)p.push('Toko pertama (acuan RFB)'); else if(r.seq===0)p.push('Titik awal');
   if(r.outsidePlan)p.push('Di luar JKS hari ini');
   if(r.brk)p.push('Mulai setelah istirahat');
+  if(r.freq&&r.freq.N)p.push(r.inserted?'Tidak ada di RFB acuan, disisipkan di posisi terdekat':'Dikunjungi '+r.freq.n+' dari '+r.freq.N+' minggu acuan');
   p.push(r.dur.src==='rfb'?'Durasi RFB '+r.dur.n+'x':r.dur.src==='salesman'?'Durasi median salesman':r.dur.src==='global'?'Durasi median umum':'Durasi default');
   if(r.addOut)p.push(sg(r.addOut)+' mnt di toko');
   if(r.leg!=null){p.push('Tempuh asli '+r.leg.toFixed(1).replace('.',',')+' mnt');if(r.addTrv)p.push(sg(r.addTrv)+' mnt tempuh');}
   return p.join('; ');
 }
+
 function buildWorkbook(ExcelJS,list){
   const wb=new ExcelJS.Workbook(); wb.creator='JKS Time Planner';
   const BLUE='FF00B0F0',YEL='FFFFFF00',GREY='FFD9D9D9',F='Arial',thin={style:'thin',color:{argb:'FF000000'}};
@@ -432,12 +531,13 @@ function buildWorkbook(ExcelJS,list){
   const heads=['Depo','Nik Sales','Nama Sales','Hari Kunj','No Urut','Id Pelanggan','Nama Pelanggan','Alamat','Klasifikasi Durasi Dioutlet','Klasifikasi Durasi Perjalanan','','Jam  Berkunjung','Durasi di Outlet','Selesai Kunjungan','Durasi Perjalanan','Catatan'];
   const yellowCols=[5,9,10,11];
   for(const sm of list){
-    let nm=('JKS '+sm.nama).replace(/[\\\/\?\*\[\]:]/g,'').slice(0,28),k=2,base=nm;
-    while(names.has(nm.toLowerCase())){nm=base.slice(0,26)+' '+k++;}
+    const sfx=sm.wk==='ganjil'?' Ganjil':' Genap';
+    let nm=('JKS '+sm.nama.replace(/[\\\/\?\*\[\]:]/g,'').slice(0,20)+sfx),k=2,base=nm;
+    while(names.has(nm.toLowerCase())){nm=base.slice(0,28)+' '+k++;}
     names.add(nm.toLowerCase());
     const ws=wb.addWorksheet(nm,{views:[{showGridLines:false}]});
     [16,12,20,26,8,19,26,46,13,13,1.5,12,12,12,12,52].forEach((w,i)=>ws.getColumn(i+1).width=w);
-    const a1=ws.getCell('A1');a1.value='Time Management Salesman - '+(sm.tipeSales||'Salesman')+' - '+sm.nama;a1.font={name:F,size:16,bold:true};
+    const a1=ws.getCell('A1');a1.value='Time Management Salesman - '+(sm.tipeSales||'Salesman')+' - '+sm.nama+(sm.wkLabel?' - '+sm.wkLabel:'');a1.font={name:F,size:16,bold:true};
     const a2=ws.getCell('A2');a2.value='Note : Isi Kolom Warna Kuning';a2.font={name:F,size:10,bold:true};a2.fill={type:'pattern',pattern:'solid',fgColor:{argb:YEL}};
     let hr=3;
     for(const d of sm.days){
@@ -493,7 +593,7 @@ function buildWorkbook(ExcelJS,list){
 
 /* ===== UI ===== */
 const $=s=>document.querySelector(s);
-const S={jks:null,rfb:null,jksName:'',rfbName:'',sel:new Set(),plan:[],sm:null,wd:null,running:false,ctx:null};
+const S={jks:null,rfb:null,jksNames:[],rfbName:'',sel:new Set(),ranges:{genap:[],ganjil:[]},plan:[],sm:null,wk:null,wd:null,running:false,ctx:null,match:null,cache:new Map()};
 const fetcher=u=>fetch(u);
 function toast(t,ms=3200){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.display='none',ms);}
 const nf=n=>Number(n).toLocaleString('id-ID');
@@ -504,32 +604,44 @@ async function readXlsx(file){
 }
 function wireDrop(id,handler){
   const el=$(id),inp=el.querySelector('input');
-  inp.addEventListener('change',()=>inp.files[0]&&handler(inp.files[0]));
+  inp.addEventListener('change',()=>inp.files.length&&handler([...inp.files]));
   ['dragenter','dragover'].forEach(e=>el.addEventListener(e,ev=>{ev.preventDefault();el.classList.add('over');}));
   ['dragleave','drop'].forEach(e=>el.addEventListener(e,ev=>{ev.preventDefault();el.classList.remove('over');}));
-  el.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0];if(f)handler(f);});
+  el.addEventListener('drop',ev=>{const f=[...ev.dataTransfer.files];if(f.length)handler(f);});
 }
 function weekLabel(jks){
   const h24=jks.some(r=>r.tipe==='g24'),h13=jks.some(r=>r.tipe==='g13');
-  if(h24&&h13)return 'ada Minggu 2&4 dan 1&3, otomatis dipakai genap (ubah di Aturan)';
-  if(h24)return 'terdeteksi minggu genap';
-  if(h13)return 'terdeteksi minggu ganjil';
-  return 'semua baris dipakai';
+  if(h24&&h13)return 'ada Minggu 2&4 dan 1&3';
+  if(h24)return 'ada Minggu 2&4 (genap)';
+  if(h13)return 'ada Minggu 1&3 (ganjil)';
+  return 'semua baris mingguan';
 }
-wireDrop('#dJks',async f=>{
+function buildMatch(){
+  S.match=null;if(!S.jks)return;
+  const m={g24:new Set(),g13:new Set()};
+  for(const r of S.jks){if(r.tipe==='g24')m.g24.add(r.idS+'|'+r.wd+'|'+r.idP);else if(r.tipe==='g13')m.g13.add(r.idS+'|'+r.wd+'|'+r.idP);}
+  S.match=m;
+}
+wireDrop('#dJks',async files=>{
   try{
-    S.jks=readJKS(await readXlsx(f));S.jksName=f.name;
+    let all=[];for(const f of files)all=all.concat(readJKS(await readXlsx(f)));
+    const seen=new Set();
+    S.jks=all.filter(r=>{const k=[r.idS,r.hari,r.idP].join('|');if(seen.has(k))return false;seen.add(k);return true;});
+    S.jksNames=files.map(f=>f.name);
     const ids=[...new Set(S.jks.map(r=>r.idS))];S.sel=new Set(ids);
-    $('#dJks').classList.add('ok');$('#tJks').textContent=f.name+' · '+nf(S.jks.length)+' baris, '+ids.length+' salesman, '+weekLabel(S.jks);
-    renderSm();updGo();
+    const h24=S.jks.some(r=>r.tipe==='g24'),h13=S.jks.some(r=>r.tipe==='g13');
+    $('#sWkG').checked=h24||!h13;$('#sWkN').checked=h13||!h24;
+    $('#dJks').classList.add('ok');$('#tJks').textContent=S.jksNames.join(' + ')+' · '+nf(S.jks.length)+' baris, '+ids.length+' salesman, '+weekLabel(S.jks);
+    buildMatch();renderSm();renderRanges();updGo();
   }catch(e){toast(e.message,5000);}
 });
-wireDrop('#dRfb',async f=>{
+wireDrop('#dRfb',async files=>{
   try{
-    S.rfb=readRFB(await readXlsx(f));S.rfbName=f.name;
+    S.rfb=readRFB(await readXlsx(files[0]));S.rfbName=files[0].name;
     const ds=[...new Set(S.rfb.map(r=>r.dateStr))].sort();
-    $('#dRfb').classList.add('ok');$('#tRfb').textContent=f.name+' · '+nf(S.rfb.length)+' baris, '+fmtD(ds[0])+' sampai '+fmtD(ds[ds.length-1]);
-    renderSm();updGo();
+    $('#dRfb').classList.add('ok');$('#tRfb').textContent=S.rfbName+' · '+nf(S.rfb.length)+' baris, '+fmtD(ds[0])+' sampai '+fmtD(ds[ds.length-1])+' ('+ds.length+' hari)';
+    if(!S.ranges.genap.length&&!S.ranges.ganjil.length)S.ranges.genap=[{from:ds[0],to:ds[ds.length-1]}];
+    renderSm();renderRanges();updGo();
   }catch(e){toast(e.message,5000);}
 });
 function renderSm(){
@@ -548,56 +660,128 @@ $('#selAll').onclick=()=>{if(!S.jks)return;S.sel=new Set(S.jks.map(r=>r.idS));re
 $('#selNone').onclick=()=>{S.sel.clear();renderSm();updGo();};
 function updGo(){$('#go').disabled=!S.jks||!S.sel.size||S.running;}
 
+/* periode acuan */
+function rangeInfo(r){
+  if(!S.rfb||!r.from||!r.to)return '';
+  if(r.from>r.to)return 'Tanggal awal lebih besar dari tanggal akhir.';
+  const vs=S.rfb.filter(v=>v.start>0&&!isAgenda(v.alasan)&&v.dateStr>=r.from&&v.dateStr<=r.to);
+  if(!vs.length)return 'Tidak ada kunjungan di rentang ini.';
+  let s=new Set(vs.map(v=>v.dateStr)).size+' hari, '+nf(vs.length)+' kunjungan';
+  if(S.match){
+    const parts=[];
+    for(const [k,lab] of [['g24','genap'],['g13','ganjil']]){
+      if(!S.match[k].size)continue;
+      const hit=vs.filter(v=>S.match[k].has(v.idS+'|'+wdOf(v.dateStr)+'|'+v.idC)).length;
+      parts.push(lab+' '+Math.round(hit/vs.length*100)+'%');
+    }
+    if(parts.length)s+='. Kecocokan dengan JKS: '+parts.join(', ');
+  }
+  return s;
+}
+function renderRanges(){
+  for(const wk of ['genap','ganjil']){
+    const el=$('#rg'+(wk==='genap'?'Genap':'Ganjil')),rs=S.ranges[wk];
+    el.innerHTML='<div class="rgh"><b>'+WK_LABEL[wk]+'</b><button class="mini" data-add="'+wk+'" type="button">+ Rentang</button></div>'
+      +(rs.length?rs.map((r,i)=>'<div class="rg" data-rwk="'+wk+'" data-i="'+i+'"><input type="date" class="rf" value="'+esc(r.from)+'" aria-label="Dari tanggal"><span>sampai</span><input type="date" class="rt" value="'+esc(r.to)+'" aria-label="Sampai tanggal"><button class="x" data-del="'+wk+'|'+i+'" type="button" aria-label="Hapus rentang">&times;</button></div><div class="rgi">'+esc(rangeInfo(r))+'</div>').join(''):'<div class="note" style="margin-bottom:4px">Belum ada rentang.</div>');
+  }
+  const ov=[];for(const a of S.ranges.genap)for(const b of S.ranges.ganjil)if(a.from&&b.from&&a.from<=b.to&&b.from<=a.to)ov.push(1);
+  $('#rgWarn').textContent=ov.length?'Ada rentang genap dan ganjil yang tumpang tindih. Tanggal yang tumpang tindih dihitung sebagai genap.':'';
+}
+$('#cRange').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.add){S.ranges[b.dataset.add].push({from:'',to:''});renderRanges();}
+  if(b.dataset.del){const [wk,i]=b.dataset.del.split('|');S.ranges[wk].splice(+i,1);renderRanges();heavyNote();}
+});
+$('#cRange').addEventListener('change',e=>{
+  const row=e.target.closest('.rg');if(!row)return;
+  const r=S.ranges[row.dataset.rwk][+row.dataset.i];
+  if(e.target.classList.contains('rf'))r.from=e.target.value;else r.to=e.target.value;
+  renderRanges();heavyNote();
+});
+$('#autoRg').onclick=()=>{
+  if(!S.rfb){toast('Upload Route Feedback dulu.');return;}
+  const ds=[...new Set(S.rfb.map(v=>v.dateStr))].sort(),min=ds[0],max=ds[ds.length-1];
+  const res={genap:[],ganjil:[]};let cur=$('#sFirstWk').value,n=0;
+  const both=S.match&&S.match.g24.size&&S.match.g13.size;
+  for(let w=mondayOf(min);w<=max;w=addDays(w,7)){
+    const from=w<min?min:w,to=addDays(w,6)>max?max:addDays(w,6);
+    if(ds.some(d=>d>=from&&d<=to)){
+      let lab=cur;
+      if(both){
+        const vs=S.rfb.filter(v=>v.start>0&&!isAgenda(v.alasan)&&v.dateStr>=from&&v.dateStr<=to);
+        if(vs.length>=30){
+          const h=k=>vs.filter(v=>S.match[k].has(v.idS+'|'+wdOf(v.dateStr)+'|'+v.idC)).length/vs.length;
+          const a=h('g24'),b=h('g13');if(Math.abs(a-b)>=0.08)lab=a>b?'genap':'ganjil';
+        }
+      }
+      res[lab].push({from,to});n++;
+    }
+    cur=cur==='genap'?'ganjil':'genap';
+  }
+  S.ranges=res;renderRanges();heavyNote();
+  toast(n+' minggu diisi sebagai saran'+(both?' (dicocokkan dengan JKS)':' (selang-seling)')+'. Cek dan ubah kalau aturan minggu lu beda.',5000);
+};
+function heavyNote(){if(S.plan.length&&!S.running)toast('Perubahan ini perlu klik Hitung rute lagi.',3500);}
+
 /* pengaturan */
-const SET_IDS=['sWeek','sStatus','sOut','sStartMode','sStart','sEnd','sBs','sBe','sAddOut','sAddTrv','sFactor','sBase'],CHK_IDS=['sSkip','sAnch','sBreak'];
-try{const s=JSON.parse(localStorage.getItem('jksPlannerSet2')||'{}');SET_IDS.forEach(i=>{if(s[i]!=null)$('#'+i).value=s[i];});CHK_IDS.forEach(i=>{if(s[i]!=null)$('#'+i).checked=s[i];});}catch(e){}
-function saveSet(){try{const s={};SET_IDS.forEach(i=>s[i]=$('#'+i).value);CHK_IDS.forEach(i=>s[i]=$('#'+i).checked);localStorage.setItem('jksPlannerSet2',JSON.stringify(s));}catch(e){}}
+const SET_IDS=['sStatus','sOut','sExtra','sDurSrc','sOrder','sStartMode','sStart','sEnd','sBs','sBe','sAddOut','sAddTrv','sFactor','sBase','sFirstWk'],CHK_IDS=['sSkip','sAnch','sBreak','sWkG','sWkN'];
+try{const s=JSON.parse(localStorage.getItem('jksPlannerSet3')||'{}');SET_IDS.forEach(i=>{if(s[i]!=null)$('#'+i).value=s[i];});CHK_IDS.forEach(i=>{if(s[i]!=null)$('#'+i).checked=s[i];});}catch(e){}
+function saveSet(){try{const s={};SET_IDS.forEach(i=>s[i]=$('#'+i).value);CHK_IDS.forEach(i=>s[i]=$('#'+i).checked);localStorage.setItem('jksPlannerSet3',JSON.stringify(s));}catch(e){}}
 function opts(){
   const t=(v,d)=>{const p=String(v||d).split(':');return (+p[0])*60+(+p[1]||0);};
-  let week=$('#sWeek').value;if(week==='auto')week=S.jks?detectWeek(S.jks):'all';
-  return {week,status:$('#sStatus').value,outlier:+$('#sOut').value||90,skipNonVisit:$('#sSkip').checked,anchorSkip:$('#sAnch').checked,
-    startMode:$('#sStartMode').value,startFallback:t($('#sStart').value,'08:00'),endLimit:t($('#sEnd').value,'17:00'),
+  const clean=a=>a.filter(r=>r.from&&r.to).map(r=>r.from<=r.to?{from:r.from,to:r.to}:{from:r.to,to:r.from});
+  const wkTypes=[];if($('#sWkG').checked)wkTypes.push('genap');if($('#sWkN').checked)wkTypes.push('ganjil');
+  return {wkTypes,ranges:{genap:clean(S.ranges.genap),ganjil:clean(S.ranges.ganjil)},status:$('#sStatus').value,
+    outlier:+$('#sOut').value||90,skipNonVisit:$('#sSkip').checked,anchorSkip:$('#sAnch').checked,extraPct:Math.max(0,+$('#sExtra').value||0),durSrc:$('#sDurSrc').value,
+    orderMode:$('#sOrder').value,startMode:$('#sStartMode').value,startFallback:t($('#sStart').value,'08:00'),endLimit:t($('#sEnd').value,'17:00'),
     breakOn:$('#sBreak').checked,breakStart:t($('#sBs').value,'12:00'),breakEnd:t($('#sBe').value,'13:00'),
     addOut:parseInt($('#sAddOut').value,10)||0,addTrv:parseInt($('#sAddTrv').value,10)||0,
     factor:+$('#sFactor').value||1,base:$('#sBase').value.trim()||'https://router.project-osrm.org'};
 }
-/* ubah jam, istirahat, penyesuaian: langsung diterapkan tanpa menghubungi OSRM lagi */
+function durData(o){
+  const r=S.rfb||[];
+  return o.durSrc==='ref'?r.filter(v=>inRanges(v.dateStr,o.ranges.genap)||inRanges(v.dateStr,o.ranges.ganjil)):r;
+}
+/* ubah urutan, jam, istirahat, penyesuaian: langsung berlaku tanpa menghubungi OSRM lagi */
 function reschedule(){
   if(!S.plan.length||S.running||!S.ctx)return;
-  const o=opts();S.ctx={...S.ctx,base:o.base,factor:o.factor,durModel:buildDurModel(S.rfb||[],o),o};
-  for(const sm of S.plan)for(const d of sm.days)if(d.M&&(d.status==='ok'||d.status==='est'))scheduleDay(d,sm.idS,S.ctx);
+  const o=opts();S.ctx={...S.ctx,base:o.base,factor:o.factor,durModel:buildDurModel(durData(o),o),o};
+  for(const e of S.plan)for(const d of e.days)if(d.M&&(d.status==='ok'||d.status==='est'))scheduleDay(d,e.idS,S.ctx);
   renderStage();
 }
 let lt;
-['sStartMode','sStart','sEnd','sBreak','sBs','sBe','sAddOut','sAddTrv','sFactor','sOut','sSkip'].forEach(id=>{
+['sOrder','sStartMode','sStart','sEnd','sBreak','sBs','sBe','sAddOut','sAddTrv','sFactor','sOut','sSkip','sDurSrc'].forEach(id=>{
   const f=()=>{saveSet();clearTimeout(lt);lt=setTimeout(reschedule,250);};
   $('#'+id).addEventListener('input',f);$('#'+id).addEventListener('change',f);
 });
-['sWeek','sStatus','sAnch','sBase'].forEach(id=>$('#'+id).addEventListener('change',()=>{
-  saveSet();if(S.plan.length&&!S.running)toast('Pengaturan ini mengubah daftar toko. Klik Hitung rute lagi untuk menerapkan.',4500);
+['sWkG','sWkN','sStatus','sAnch','sExtra','sBase','sFirstWk'].forEach(id=>$('#'+id).addEventListener('change',()=>{
+  saveSet();if(id==='sBase')S.cache.clear();if(id!=='sFirstWk')heavyNote();
 }));
 
 /* hitung */
 function setProg(i,n,t){const p=$('#prog');p.style.display=i<n?'block':'none';p.firstElementChild.style.width=(n?i/n*100:0)+'%';const pt=$('#progT');pt.style.display=i<n?'block':'none';pt.textContent=t||'';}
-async function solveOne(sm,d){
-  try{await solveDay(d,sm.idS,S.ctx);}catch(e){d.status='error';d.err=e.message||String(e);}
+async function solveOne(e,d){
+  try{await solveDay(d,e.idS,S.ctx);}catch(x){d.status='error';d.err=x.message||String(x);}
 }
 $('#go').onclick=async()=>{
-  const o=opts();S.running=true;updGo();
+  const o=opts();
+  if(!o.wkTypes.length){toast('Pilih minimal satu jenis minggu (genap atau ganjil).');return;}
+  S.running=true;updGo();
   const rfb=S.rfb||[];
-  S.ctx={base:o.base,factor:o.factor,fetcher,durModel:buildDurModel(rfb,o),o};
+  S.ctx={base:o.base,factor:o.factor,fetcher,cache:S.cache,durModel:buildDurModel(durData(o),o),o};
   S.plan=planDays(S.jks,rfb,[...S.sel],o);
   if(!S.plan.length){toast('Tidak ada rute untuk salesman dan aturan yang dipilih.');S.running=false;updGo();return;}
-  S.sm=S.plan[0].idS;S.wd=S.plan[0].days[0].wd;renderStage();
-  const all=S.plan.flatMap(sm=>sm.days.map(d=>[sm,d]));let i=0;
-  for(const [sm,d] of all){
-    setProg(i,all.length,'Menghitung '+sm.nama+' · '+d.hari+' ('+(i+1)+' dari '+all.length+')');
-    await solveOne(sm,d);i++;renderStage();
+  S.sm=S.plan[0].idS;S.wk=S.plan[0].wk;S.wd=S.plan[0].days[0].wd;renderStage();
+  const all=S.plan.flatMap(e=>e.days.map(d=>[e,d]));let i=0;
+  for(const [e,d] of all){
+    setProg(i,all.length,'Menghitung '+e.nama+' · '+e.wkLabel+' · '+d.hari+' ('+(i+1)+' dari '+all.length+')');
+    await solveOne(e,d);i++;
+    if(i%4===0||d.fetched)renderStage();
     if(d.status==='error'&&/jangkau|429|membatasi/i.test(d.err)){
-      for(const [sm2,d2] of all.slice(i)){d2.status='error';d2.err=d.err;}
+      for(const [e2,d2] of all.slice(i)){d2.status='error';d2.err=d.err;}
       toast('Server OSRM bermasalah. Sisa hari ditandai gagal, silakan coba lagi.',5000);break;
     }
-    await sleep(250);
+    if(d.fetched)await sleep(250);
   }
   setProg(1,1,'');S.running=false;updGo();renderStage();
   const bad=all.filter(([,d])=>d.status==='error').length;
@@ -606,69 +790,79 @@ $('#go').onclick=async()=>{
 
 /* tampilan */
 function emptyHtml(){
-  return '<div class="empty"><h1>Dari urutan toko ke jam kunjungan, otomatis</h1><p>Upload JKS (genap atau ganjil) dan Route Feedback, pilih salesman, lalu hitung. Toko pertama tiap hari diambil dari Route Feedback, urutan berikutnya dari toko terdekat berdasarkan waktu tempuh jalan, dan hasilnya diexport ke format Excel Time Management Salesman. Jam mulai, istirahat, dan tambahan durasi bisa diatur dan langsung berlaku tanpa hitung ulang.</p>'
+  return '<div class="empty"><h1>Dari urutan toko ke jam kunjungan, otomatis</h1><p>Upload JKS dan Route Feedback (boleh dua bulan sekaligus), tentukan tanggal acuan untuk minggu genap dan ganjil, lalu hitung. Web mencari toko pertama dan urutan yang paling sering dijalani tiap salesman, menghitung waktu tempuh jalan, dan mengexport ke format Excel Time Management Salesman. Urutan, jam mulai, istirahat, dan tambahan durasi bisa diatur dan langsung berlaku tanpa hitung ulang.</p>'
   +'<div class="tl"><div class="strip"><i class="o" style="width:14%"></i><i class="t" style="width:6%"></i><i class="o" style="width:9%"></i><i class="t" style="width:4%"></i><i class="o" style="width:11%"></i><i class="b" style="width:8%"></i><i class="o" style="width:9%"></i><i class="t" style="width:5%"></i><i class="o" style="width:14%"></i><i class="t" style="width:3%"></i><i class="o" style="width:16%"></i></div><div class="ax"><span>Toko pertama</span><span>Toko terakhir</span></div></div>'
   +'<div class="lg"><span><s style="background:var(--blue)"></s>Di toko</span><span><s style="background:var(--org)"></s>Di jalan</span><span><s style="background:#B7C3CD"></s>Istirahat</span></div></div>';
 }
 function dotCls(d){return d.status==='ok'?'ok':d.status==='est'?'est':d.status==='error'?'err':'';}
 const fmtH=m=>{const h=Math.floor(m/60),mm=Math.round(m%60);return h?h+' j '+mm+' m':mm+' m';};
+function curEntry(){
+  const list=S.plan.filter(e=>e.idS===S.sm);
+  return list.find(e=>e.wk===S.wk)||list[0]||S.plan[0];
+}
 function renderStage(){
   const st=$('#stage');
   if(!S.plan.length){st.innerHTML=emptyHtml();return;}
-  const all=S.plan.flatMap(sm=>sm.days),nOk=all.filter(d=>d.status==='ok'||d.status==='est').length;
-  const nStops=all.reduce((a,d)=>a+d.stops.length,0);
-  const sm=S.plan.find(x=>x.idS===S.sm)||S.plan[0];
-  const day=sm.days.find(d=>d.wd===S.wd)||sm.days[0];
-  let h='<div class="bar"><span class="st"><b>'+S.plan.length+'</b> salesman</span><span class="st"><b>'+all.length+'</b> hari rute</span><span class="st"><b>'+nf(nStops)+'</b> toko</span><span class="st"><b>'+nOk+'/'+all.length+'</b> sudah dihitung</span><span class="sp"></span>'
-   +'<button class="btn sec sm2" data-act="expOne"'+(nOk?'':' disabled')+'>Export '+esc(sm.nama.split(' ')[0])+'</button><button class="btn sm2" data-act="expAll"'+(nOk?'':' disabled')+'>Export semua salesman</button></div>';
-  h+='<div class="chips">'+S.plan.map(x=>'<button class="chip'+(x.idS===sm.idS?' on':'')+'" data-sm="'+x.idS+'"><b>'+esc(x.nama)+'</b><small>'+x.days.length+' hari · '+x.days.reduce((a,d)=>a+d.stops.length,0)+' toko'+(x.rfbNama&&x.rfbNama!==x.nama?' · RFB: '+esc(x.rfbNama.split(' ')[0]):'')+'</small></button>').join('')+'</div>';
-  h+='<div class="chips">'+sm.days.map(d=>'<button class="chip'+(d.wd===day.wd?' on':'')+'" data-wd="'+d.wd+'"><b><span class="dot '+dotCls(d)+'"></span>'+d.hari+'</b><small>'+(d.dateStr?fmtD(d.dateStr):'tanpa RFB')+' · '+d.stops.length+' toko</small></button>').join('')+'</div>';
-  h+=dayHtml(sm,day);
+  const all=S.plan.flatMap(e=>e.days),nOk=all.filter(d=>d.status==='ok'||d.status==='est').length;
+  const nStops=all.reduce((a,d)=>a+d.stops.length,0),people=[...new Map(S.plan.map(e=>[e.idS,e])).values()];
+  const e=curEntry();S.sm=e.idS;S.wk=e.wk;
+  const day=e.days.find(d=>d.wd===S.wd)||e.days[0];S.wd=day.wd;
+  let h='<div class="bar"><span class="st"><b>'+people.length+'</b> salesman</span><span class="st"><b>'+S.plan.length+'</b> jadwal</span><span class="st"><b>'+all.length+'</b> hari rute</span><span class="st"><b>'+nf(nStops)+'</b> toko</span><span class="st"><b>'+nOk+'/'+all.length+'</b> sudah dihitung</span><span class="sp"></span>'
+   +'<button class="btn sec sm2" data-act="expOne"'+(nOk?'':' disabled')+'>Export '+esc(e.nama.split(' ')[0])+'</button><button class="btn sm2" data-act="expAll"'+(nOk?'':' disabled')+'>Export semua salesman</button></div>';
+  h+='<div class="chips">'+people.map(x=>{const mine=S.plan.filter(y=>y.idS===x.idS);return '<button class="chip'+(x.idS===e.idS?' on':'')+'" data-sm="'+x.idS+'"><b>'+esc(x.nama)+'</b><small>'+mine.reduce((a,y)=>a+y.days.reduce((b,d)=>b+d.stops.length,0),0)+' toko'+(x.rfbNama&&x.rfbNama!==x.nama?' · RFB: '+esc(x.rfbNama.split(' ')[0]):'')+'</small></button>';}).join('')+'</div>';
+  const wks=S.plan.filter(y=>y.idS===e.idS);
+  if(wks.length>1)h+='<div class="chips">'+wks.map(y=>'<button class="chip'+(y.wk===e.wk?' on':'')+'" data-wk="'+y.wk+'"><b>'+y.wkLabel+'</b><small>'+y.days.length+' hari · '+y.days.reduce((a,d)=>a+d.stops.length,0)+' toko</small></button>').join('')+'</div>';
+  h+='<div class="chips">'+e.days.map(d=>'<button class="chip'+(d.wd===day.wd?' on':'')+'" data-wd="'+d.wd+'"><b><span class="dot '+dotCls(d)+'"></span>'+d.hari+'</b><small>'+(d.refN?d.refN+' minggu acuan':'tanpa acuan')+' · '+d.stops.length+' toko</small></button>').join('')+'</div>';
+  h+=dayHtml(e,day);
   st.innerHTML=h;
 }
 function subOf(d,o){
   const a=d.anchor,useRfb=o.startMode==='rfb'&&d.anchorStart!=null,st=useRfb?d.anchorStart:o.startFallback;
-  const first=a.src==='rfb'?'Toko pertama: '+esc(a.namaC)+' (Route Feedback '+fmtD(a.date)+')':'Titik awal: toko No Urut terkecil (tanpa Route Feedback)';
-  return first+', mulai '+fmtT(st)+(useRfb?' sesuai jam Route Feedback':' (jam diatur)');
+  const first=a.src==='rfb'?'Toko pertama: '+esc(a.namaC)+' (paling sering, '+a.n+' dari '+a.N+' minggu acuan)':'Titik awal: toko No Urut terkecil (tanpa Route Feedback acuan)';
+  return first+', mulai '+fmtT(st)+(useRfb?' (median jam Route Feedback)':' (jam diatur)');
 }
-function dayHtml(sm,d){
+function dayHtml(en,d){
   const o=S.ctx?S.ctx.o:opts();
   let h='';
   const sub=subOf(d,o);
   const jad=(d.jadwal||[]).map(j=>'<span class="tag d" title="Hari Kunj di JKS">'+esc(j[0])+' · '+j[1]+'</span>').join(' ');
+  const acuan=d.refN?'Acuan '+d.refN+' minggu: '+d.refDates.slice(0,8).map(fmtD).join(', ')+(d.refDates.length>8?' dan lainnya':''):'';
   if(d.status==='error'){
     return '<div class="dayhead"><div><h3>'+d.hari+'</h3><div class="kp">'+sub+'</div></div></div><div class="alert err"><b>Gagal menghitung hari ini.</b> '+esc(d.err||'')+'<div class="ac"><button class="btn sm2" data-act="retry">Coba lagi</button><button class="btn sm2 org" data-act="est">Pakai estimasi garis lurus</button></div></div>';
   }
   if(d.status==='pending') return '<div class="dayhead"><div><h3>'+d.hari+'</h3><div class="kp">'+sub+'</div></div></div><div class="alert warn">Belum dihitung.</div>';
   const late=d.end>o.endLimit;
-  h+='<div class="dayhead"><div><h3>'+d.hari+(d.dateStr?' <span class="mu" style="font:400 13px var(--body)">'+fmtD(d.dateStr)+'</span>':'')+'</h3><div class="kp">'+sub+'</div><div class="kp" style="margin-top:3px">Jadwal di JKS: '+jad+'</div></div>'
+  h+='<div class="dayhead"><div><h3>'+d.hari+' <span class="mu" style="font:400 13px var(--body)">'+esc(en.wkLabel)+'</span></h3><div class="kp">'+sub+'</div>'+(acuan?'<div class="kp" style="margin-top:2px">'+acuan+'</div>':'')+'<div class="kp" style="margin-top:3px">Jadwal di JKS: '+jad+'</div></div>'
    +'<div class="kp"><span><b>'+d.stops.length+'</b> toko</span><span>di toko <b>'+fmtH(d.totOut)+'</b></span><span>di jalan <b>'+fmtH(d.totTrv)+'</b></span>'+(d.breakMin?'<span>istirahat <b>'+fmtH(d.breakMin)+'</b></span>':'')+'<span'+(late?' class="late"':'')+'>selesai <b'+(late?' class="late"':'')+'>'+fmtT(d.end)+'</b>'+(late?' (lewat '+fmtT(o.endLimit)+')':'')+'</span></div></div>';
   if(d.status==='est')h+='<div class="alert est"><b>Waktu tempuh hari ini estimasi garis lurus, bukan rute jalan.</b> Hasil export ditandai. <div class="ac"><button class="btn sm2" data-act="retry">Hitung ulang dengan OSRM</button></div></div>';
+  if(o.orderMode==='rfb'&&!d.rfbSeq)h+='<div class="alert warn">Tidak ada data Route Feedback acuan untuk hari ini, jadi urutan terdekat dipakai.</div>';
   d.warn.forEach(w=>h+='<div class="alert warn">'+esc(w)+'</div>');
   if(o.breakOn&&!d.breakMin)h+='<div class="note" style="margin-bottom:6px">Tidak ada kunjungan yang jatuh di jam istirahat '+fmtT(o.breakStart)+' - '+fmtT(o.breakEnd)+' pada hari ini.</div>';
   const tot=d.end-d.rows[0].jam;
   h+='<div class="tl"><div class="strip">'+d.rows.map(r=>(r.brk?'<i class="b" style="width:'+((r.brk.to-r.brk.from)/tot*100)+'%" title="Istirahat '+fmtT(r.brk.from)+'-'+fmtT(r.brk.to)+'"></i>':'')+'<i class="o" style="width:'+(r.outKey/tot*100)+'%" title="'+esc(r.namaP)+' '+fmtT(r.jam)+'-'+fmtT(r.selesai)+'"></i>'+(r.key!=null?'<i class="t" style="width:'+(r.key/tot*100)+'%" title="Tempuh '+r.key+' menit"></i>':'')).join('')+'</div><div class="ax"><span>'+fmtT(d.rows[0].jam)+'</span><span>'+fmtT(d.end)+'</span></div></div>';
   h+='<div class="lg"><span><s style="background:var(--blue)"></s>Di toko</span><span><s style="background:var(--org)"></s>Di jalan</span><span><s style="background:#B7C3CD"></s>Istirahat</span></div>';
-  h+='<div class="tbw"><table><thead><tr><th class="r">No</th><th>Toko</th><th>Hari Kunj (JKS)</th><th>Alamat</th><th class="r">Di toko (mnt)</th><th class="r">Ke toko berikut (mnt)</th><th class="r">Jam</th><th class="r">Selesai</th></tr></thead><tbody>';
-  h+=d.rows.map(r=>(r.brk?'<tr class="brk"><td colspan="8">Istirahat '+fmtT(r.brk.from)+' - '+fmtT(r.brk.to)+'</td></tr>':'')+'<tr><td class="r">'+r.seq+'</td><td class="nm"><b>'+esc(r.namaP)+'</b>'+(r.isAnchor?'<span class="tag p">toko pertama</span>':r.seq===0?'<span class="tag p">titik awal</span>':'')+(r.outsidePlan?'<span class="tag x">di luar JKS hari ini</span>':'')+'<small>'+esc(r.idP)+'</small></td><td class="hk">'+(r.outsidePlan?'-':esc(r.jks))+'</td><td class="ad" title="'+esc(r.alamat)+'">'+esc(r.alamat)+'</td>'
+  h+='<div class="tbw"><table><thead><tr><th class="r">No</th><th>Toko</th><th>Hari Kunj (JKS)</th><th>Alamat</th><th class="r" title="Berapa kali dikunjungi dari jumlah minggu acuan">Acuan</th><th class="r">Di toko (mnt)</th><th class="r">Ke toko berikut (mnt)</th><th class="r">Jam</th><th class="r">Selesai</th></tr></thead><tbody>';
+  h+=d.rows.map(r=>(r.brk?'<tr class="brk"><td colspan="9">Istirahat '+fmtT(r.brk.from)+' - '+fmtT(r.brk.to)+'</td></tr>':'')+'<tr><td class="r">'+r.seq+'</td><td class="nm"><b>'+esc(r.namaP)+'</b>'+(r.isAnchor?'<span class="tag p">toko pertama</span>':r.seq===0?'<span class="tag p">titik awal</span>':'')+(r.outsidePlan?'<span class="tag x">di luar JKS hari ini</span>':'')+(r.inserted?'<span class="tag d">disisipkan</span>':'')+'<small>'+esc(r.idP)+'</small></td><td class="hk">'+(r.outsidePlan?'-':esc(r.jks))+'</td><td class="ad" title="'+esc(r.alamat)+'">'+esc(r.alamat)+'</td>'
+    +'<td class="r">'+(r.freq&&r.freq.N?'<span class="mu">'+r.freq.n+'/'+r.freq.N+'</span>':'<span class="mu">-</span>')+'</td>'
     +'<td class="r">'+r.outKey+(r.dur.src==='rfb'?' <span class="mu">('+r.dur.n+'x)</span>':'<span class="tag d">'+(r.dur.src==='salesman'?'median salesman':r.dur.src==='global'?'median umum':'default')+'</span>')+'</td>'
     +'<td class="r">'+(r.key==null?'<span class="mu">-</span>':r.key+' <span class="mu">('+r.leg.toFixed(1).replace('.',',')+')</span>')+'</td><td class="r"><b>'+fmtT(r.jam)+'</b></td><td class="r">'+fmtT(r.selesai)+'</td></tr>').join('');
   h+='</tbody></table></div><p class="note" style="margin:6px 2px">Angka dalam kurung di kolom tempuh adalah waktu asli sebelum penyesuaian. Tempuh dihitung dari OSRM dikali faktor '+String(o.factor).replace('.',',')+(o.addTrv?', ditambah '+o.addTrv+' mnt per ruas':'')+(o.addOut?'. Durasi di toko ditambah '+o.addOut+' mnt per toko':'')+'.</p>';
   return h;
 }
-$('#stage').addEventListener('click',async e=>{
-  const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.sm){S.sm=b.dataset.sm;const sm=S.plan.find(x=>x.idS===S.sm);if(!sm.days.some(d=>d.wd===S.wd))S.wd=sm.days[0].wd;renderStage();return;}
+$('#stage').addEventListener('click',async ev=>{
+  const b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.sm){S.sm=b.dataset.sm;renderStage();return;}
+  if(b.dataset.wk){S.wk=b.dataset.wk;renderStage();return;}
   if(b.dataset.wd!==undefined){S.wd=+b.dataset.wd;renderStage();return;}
-  const sm=S.plan.find(x=>x.idS===S.sm),d=sm&&sm.days.find(x=>x.wd===S.wd),act=b.dataset.act;
-  if(act==='retry'||act==='est'){d.useEst=act==='est';d.status='pending';renderStage();await solveOne(sm,d);renderStage();}
-  if(act==='expOne')exportList([sm],'Time_Management_'+sm.nama.replace(/\s+/g,'_'));
+  const e=curEntry(),d=e&&e.days.find(x=>x.wd===S.wd),act=b.dataset.act;
+  if(act==='retry'||act==='est'){d.useEst=act==='est';d.status='pending';renderStage();await solveOne(e,d);renderStage();}
+  if(act==='expOne')exportList(S.plan.filter(x=>x.idS===e.idS),'Time_Management_'+e.nama.replace(/\s+/g,'_'));
   if(act==='expAll')exportList(S.plan,'Time_Management_Semua_Salesman');
 });
 async function exportList(list,name){
-  const ready=list.map(sm=>({...sm,days:sm.days.filter(d=>d.status==='ok'||d.status==='est')})).filter(sm=>sm.days.length);
+  const ready=list.map(e=>({...e,days:e.days.filter(d=>d.status==='ok'||d.status==='est')})).filter(e=>e.days.length);
   if(!ready.length){toast('Belum ada hari yang selesai dihitung.');return;}
-  const skipped=list.reduce((a,sm)=>a+sm.days.filter(d=>d.status==='error'||d.status==='pending').length,0);
+  const skipped=list.reduce((a,e)=>a+e.days.filter(d=>d.status==='error'||d.status==='pending').length,0);
   const wb=buildWorkbook(ExcelJS,ready);
   const buf=await wb.xlsx.writeBuffer();
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
@@ -677,8 +871,8 @@ async function exportList(list,name){
 }
 
 /* kalibrasi: bandingkan OSRM dengan file Rute Kunjungan (RutaMap) */
-wireDrop('#dCal',async f=>{
-  const res=$('#calRes');res.style.display='block';res.textContent='Membaca file...';
+wireDrop('#dCal',async files=>{
+  const f=files[0],res=$('#calRes');res.style.display='block';res.textContent='Membaca file...';
   try{
     const rows=await readXlsx(f);const g=mkGet(Object.keys(rows[0]),{lat:['latitude'],lon:['longitude'],t:['waktutempuhmenit','waktutempuh'],urut:['urutan']});
     if(!g.map.lat||!g.map.lon||!g.map.t)throw new Error('Kolom Latitude, Longitude, dan Waktu tempuh (menit) tidak ditemukan.');
@@ -700,7 +894,7 @@ wireDrop('#dCal',async f=>{
     $('#dCal').classList.add('ok');$('#tCal').textContent=f.name;
   }catch(e){res.textContent='Gagal: '+e.message;}
 });
-renderStage();
+renderRanges();renderStage();
 </script>
 </body>
 </html>
